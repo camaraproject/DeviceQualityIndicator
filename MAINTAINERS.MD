@@ -1,3 +1,6 @@
 | Org                    | Name                                      | GitHub Username        |
 | -----------------------| ------------------------------------------| -----------------------|
-| §company§ | §name§ | §github_username§ |
+| Deutsche Telekom | Noel Wirzius | NoelWirzius |
+| Orange | Ludovic Robert | bigludo7 |
+| Vodafone | Eric Murray | eric-murray |
+| Vodafone | Sachin Kumar | sachinvodafone |
