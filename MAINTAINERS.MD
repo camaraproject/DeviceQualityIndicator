@@ -5,3 +5,4 @@
 | Orange                 | Ludovic Robert       | bigludo7              |
 | Vodafone               | Eric Murray          | eric-murray           |
 | Vodafone               | Sachin Kumar         | sachinvodafone        |
+| Verizon                | Mahesh Chapalamadugu | maheshc01             |
