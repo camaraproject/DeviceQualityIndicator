@@ -5,9 +5,13 @@
 <a href="https://github.com/camaraproject/DeviceQualityIndicator" title="Repo Size"><img src="https://img.shields.io/github/repo-size/camaraproject/DeviceQualityIndicator?style=plastic"></a>
 <a href="https://github.com/camaraproject/DeviceQualityIndicator/blob/main/LICENSE" title="License"><img src="https://img.shields.io/badge/License-Apache%202.0-green.svg?style=plastic"></a>
 <a href="https://github.com/camaraproject/DeviceQualityIndicator/releases/latest" title="Latest Release"><img src="https://img.shields.io/github/release/camaraproject/DeviceQualityIndicator?style=plastic"></a>
+<a href="https://github.com/camaraproject/Governance/blob/main/ProjectStructureAndRoles.md" title="Sandbox API Repository"><img src="https://img.shields.io/badge/Sandbox%20API%20Repository-yellow?style=plastic"></a>
 
 # DeviceQualityIndicator
+
 Repository to describe, develop, document, and test the DeviceQualityIndicator API within the Sub Project [DeviceStatus]([https://wiki.camaraproject.org/display/CAM/Sub+Projects](https://wiki.camaraproject.org/x/-QAG)) of CAMARA
+
+* API Repository [wiki page](https://lf-camaraproject.atlassian.net/wiki/x/GQCbBQ)
 
 ## Scope
 
