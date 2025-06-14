@@ -9,7 +9,7 @@
 
 # DeviceQualityIndicator
 
-Repository to describe, develop, document, and test the DeviceQualityIndicator API within the Sub Project [DeviceStatus]([https://wiki.camaraproject.org/display/CAM/Sub+Projects](https://wiki.camaraproject.org/x/-QAG)) of CAMARA
+Repository to describe, develop, document, and test the DeviceQualityIndicator API within the Sub Project [DeviceStatus](https://lf-camaraproject.atlassian.net/wiki/x/6wApBQ) of CAMARA
 
 * API Repository [wiki page](https://lf-camaraproject.atlassian.net/wiki/x/GQCbBQ)
 
