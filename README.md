@@ -9,7 +9,7 @@
 
 # DeviceQualityIndicator
 
-Repository to describe, develop, document, and test the DeviceQualityIndicator API within the Sub Project [DeviceStatus](https://lf-camaraproject.atlassian.net/wiki/x/6wApBQ) of CAMARA
+Sandbox API repository to describe, develop, document, and test the DeviceQualityIndicator API within the Sub Project [DeviceStatus](https://lf-camaraproject.atlassian.net/wiki/x/6wApBQ) of CAMARA
 
 * API Repository [wiki page](https://lf-camaraproject.atlassian.net/wiki/x/GQCbBQ)
 
