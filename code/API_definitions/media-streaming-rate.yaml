@@ -1,26 +1,31 @@
 openapi: 3.0.3
 info:
-  title: Media Rate API
+  title: Media Streaming Rate API
   version: wip
   x-camara-commonalities: 0.6
   description: |
-    This is a media rate service API that allows application developers to retrieve
-    the maximum media bit rate supported for a given device.
+    This is a media streaming rate service API that allows application developers to retrieve
+    the maximum media streaming bit rate supported for a given device.
 
     # Introduction
-      The Media Rate API allows an application developer to query the network
-      for the maximum supported media bit rate for a specific end user device.
-      This information helps developers ensure their media applications can provide
-      optimal quality while using the current network connection.
+      The Media Streaming Rate API allows an application developer to query the network
+      for the maximum supported media streaming bit rate for a specific end user device.
+      This API measures device connection quality by determining the maximum downstream
+      data rate available for media streaming, which is influenced by factors such as
+      network conditions, device capabilities, and current network congestion.
+
+      This information helps developers ensure their media streaming applications can provide
+      optimal quality while using the current network connection, enabling adaptive bitrate
+      streaming and preventing buffering issues.
 
     # API functionality
 
     Prerequisite: authorisation and authentication
 
     Usage:
-      1. Request: POST `retrieve-max-media-rate`, passing device identification
+      1. Request: POST `retrieve-maximum-downstream-media-rate`, passing device identification
          information such as IP address, phone number, or network access identifier.
-      2. Response: The network will return the maximum media bit rate supported
+      2. Response: The network will return the maximum downstream media streaming bit rate supported
          for the device along with the unit of measurement.
 
     # Usage in Media Streaming Applications
@@ -29,15 +34,15 @@ info:
     video resolution for streaming. A typical workflow:
 
     1. Application client requests manifest file (DASH/HLS) from CDN server
-    2. Application client calls Media Rate API to get maximum supported bit rate
+    2. Application client calls Media Streaming Rate API to get maximum supported bit rate
     3. Based on the response, application selects appropriate media resolution from the manifest
     4. Application begins media streaming from CDN using the optimal resolution
 
     This approach ensures the best possible viewing experience while preventing buffering or quality issues.
 
-    The diagram below illustrates how the Media Rate API is used in a typical media streaming application:
+    The diagram below illustrates how the Media Streaming Rate API is used in a typical media streaming application:
 
-    ![Media Rate API Sequence Diagram](../../documentation/SupportingDocuments/media-rate-sequence-flow.png)
+    ![Media Streaming Rate API Sequence Diagram](../../documentation/SupportingDocuments/media-rate-sequence-flow.png)
 
     # Token usage: two-legged vs three-legged
 
@@ -74,10 +79,10 @@ info:
 
 externalDocs:
   description: Product documentation
-  url: https://github.com/camaraproject/MediaRate
+  url: https://github.com/camaraproject/DeviceQualityIndicator
 
 servers:
-  - url: "{apiRoot}/media-rate/wip"
+  - url: "{apiRoot}/media-streaming-rate/wip"
     variables:
       apiRoot:
         default: http://localhost:8087
@@ -86,35 +91,34 @@ servers:
           `api.example.com` or `api.example.com/somepath`
 
 tags:
-  - name: Media Rate
+  - name: Media Streaming Rate
     description: |
-      Retrieve the maximum media bit rate supported for a given device.
+      Retrieve the maximum media streaming bit rate supported for a given device.
 
 paths:
-  /retrieve-max-media-rate:
+  /retrieve-maximum-downstream-media-rate:
     post:
       security:
         - openId:
-            - media-rate:retrieve
+            - media-streaming-rate:retrieve-maximum-downstream-media-rate
       tags:
-        - Media Rate
-      summary: Get maximum media rate
+        - Media Streaming Rate
+      summary: Get maximum downstream media streaming rate
       description: |
-        Retrieve the maximum media rate for a device. This helps application
+        Retrieve the maximum downstream media streaming rate for a device. This helps application
         developers determine the optimal media quality settings for their applications.
 
         When using a two-legged token, the device object MUST be provided.
         When using a three-legged token, the device object MUST NOT be provided as
         the device information will be extracted from the token.
-      operationId: retrieveMaxMediaRate
+      operationId: retrieveMaximumDownstreamMediaRate
       parameters:
         - name: x-correlator
           in: header
           required: false
-          description: Correlation id passed by client for request tracing
+          description: Correlation id for the different services
           schema:
-            type: string
-            pattern: ^[a-zA-Z0-9-]{0,55}$
+            $ref: "#/components/schemas/XCorrelator"
       requestBody:
         description: Device information needed to determine media rate capabilities.
         content:
@@ -131,7 +135,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/MediaRateResponse"
+                $ref: "#/components/schemas/MediaStreamingRateResponse"
         "400":
           $ref: "#/components/responses/Generic400"
         "401":
@@ -169,19 +173,16 @@ components:
 
   headers:
     x-correlator:
-      description: |
-        Correlation ID for tracing requests across different services.
-        This header is used to track a request as it flows through the system,
-        allowing for better debugging and monitoring capabilities.
-
-        The header should be propagated in all API responses and in any
-        asynchronous callbacks related to the original request.
+      description: Correlation id for the different services
       schema:
-        type: string
-        pattern: ^[a-zA-Z0-9-]{0,55}$
-        example: "4cfe2c3e-da83-4c17-8339-32b7c17f0633"
+        $ref: "#/components/schemas/XCorrelator"
 
   schemas:
+    XCorrelator:
+      type: string
+      pattern: ^[a-zA-Z0-9-_:;.\/<>{}]{0,256}$
+      example: "b4333c46-49c0-4f62-80d7-f0ef930f1c46"
+
     Device:
       description: |
         End-user equipment able to connect to a mobile network. Examples of
@@ -195,11 +196,11 @@ components:
         * `phoneNumber`
         * `networkAccessIdentifier`
 
-        NOTE1: the MNO might support only a subset of these options. The
+        NOTE1: the network operator might support only a subset of these options. The
         API invoker can provide multiple identifiers to be compatible across
-        different MNOs. In this case the identifiers MUST belong to the same
+        different network operators. In this case the identifiers MUST belong to the same
         device.
-        NOTE2: for the Commonalities release v0.4, we are enforcing that the
+        NOTE2: as for this Commonalities release, we are enforcing that the
         networkAccessIdentifier is only part of the schema for future-proofing,
         and CAMARA does not currently allow its use. After the CAMARA
         meta-release work is concluded and the relevant issues are resolved,
@@ -215,6 +216,16 @@ components:
         ipv6Address:
           $ref: "#/components/schemas/DeviceIpv6Address"
       minProperties: 1
+
+    DeviceResponse:
+      description: |
+        An identifier for the end-user equipment able to connect to the network that the response refers to. This parameter is only returned when the API consumer includes the `device` parameter in their request (i.e. they are using a two-legged access token), and is relevant when more than one device identifier is specified, as only one of those device identifiers is allowed in the response.
+
+        If the API consumer provides more than one device identifier in their request, and this schema is included in the response definition, the API provider MUST use it to return a single identifier which is the one they are using to fulfil the request, even if the identifiers do not match the same device. API provider does not perform any logic to validate/correlate that the indicated device identifiers match the same device. No error should be returned if the identifiers are otherwise valid to prevent API consumers correlating different identifiers with a given end user.
+
+      allOf:
+        - $ref: "#/components/schemas/Device"
+        - maxProperties: 1
 
     NetworkAccessIdentifier:
       description: |
@@ -233,10 +244,10 @@ components:
         networks it corresponds to the MSISDN (Mobile Station International
         Subscriber Directory Number). In order to be globally unique it has to
         be formatted in international format, according to E.164 standard,
-        optionally prefixed with '+'.
+        prefixed with '+'.
       type: string
-      pattern: '^\+?[0-9]{5,15}$'
-      example: "123456789"
+      pattern: '^\+[1-9][0-9]{4,14}$'
+      example: "+123456789"
 
     DeviceIpv4Addr:
       type: object
@@ -292,13 +303,13 @@ components:
       minimum: 0
       maximum: 65535
 
-    MediaRateResponse:
+    MediaStreamingRateResponse:
       type: object
-      description: The maximum media bit rate supported for the device.
+      description: The maximum downstream media streaming bit rate supported for the device.
       properties:
-        maxMediaBitRateSupported:
+        maxDownstreamMediaBitRateSupported:
           type: integer
-          description: The maximum bit rate supported for the device
+          description: The maximum downstream bit rate supported for the device
           example: 10
           format: int32
           minimum: 0
@@ -314,12 +325,11 @@ components:
             - Gbps
             - Tbps
       required:
-        - maxMediaBitRateSupported
+        - maxDownstreamMediaBitRateSupported
         - unit
 
     ErrorInfo:
       type: object
-      description: Error information
       required:
         - status
         - code
@@ -327,13 +337,13 @@ components:
       properties:
         status:
           type: integer
-          description: HTTP status code returned along with this error response
+          description: HTTP response status code
         code:
           type: string
-          description: Code given to this error
+          description: A human-readable code to describe the error
         message:
           type: string
-          description: Detailed error description
+          description: A human-readable description of what the event represents
 
   responses:
     Generic400:
@@ -344,14 +354,30 @@ components:
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/ErrorInfo"
+            allOf:
+              - $ref: "#/components/schemas/ErrorInfo"
+              - type: object
+                properties:
+                  status:
+                    enum:
+                      - 400
+                  code:
+                    enum:
+                      - INVALID_ARGUMENT
+                      - OUT_OF_RANGE
           examples:
-            INVALID_ARGUMENT:
-              description: Invalid argument. Generic syntax exception.
+            GENERIC_400_INVALID_ARGUMENT:
+              description: Invalid Argument. Generic Syntax Exception
               value:
                 status: 400
                 code: INVALID_ARGUMENT
-                message: Invalid argument
+                message: Client specified an invalid argument, request body or query param.
+            GENERIC_400_OUT_OF_RANGE:
+              description: Out of Range. Specific Syntax Exception used when a given field has a pre-defined range or a invalid filter criteria combination is requested
+              value:
+                status: 400
+                code: OUT_OF_RANGE
+                message: Client specified an invalid range.
     Generic401:
       description: Unauthorized
       headers:
@@ -360,14 +386,24 @@ components:
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/ErrorInfo"
+            allOf:
+              - $ref: "#/components/schemas/ErrorInfo"
+              - type: object
+                properties:
+                  status:
+                    enum:
+                      - 401
+                  code:
+                    enum:
+                      - UNAUTHENTICATED
+                      - AUTHENTICATION_REQUIRED
           examples:
-            UNAUTHORIZED:
-              description: Authentication information is missing or invalid
+            GENERIC_401_UNAUTHENTICATED:
+              description: Request cannot be authenticated and a new authentication is required
               value:
                 status: 401
-                code: UNAUTHORIZED
-                message: Authentication information is missing or invalid
+                code: UNAUTHENTICATED
+                message: Request not authenticated due to missing, invalid, or expired credentials. A new authentication is required.
     Generic403:
       description: Forbidden
       headers:
@@ -376,52 +412,108 @@ components:
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/ErrorInfo"
+            allOf:
+              - $ref: "#/components/schemas/ErrorInfo"
+              - type: object
+                properties:
+                  status:
+                    enum:
+                      - 403
+                  code:
+                    enum:
+                      - PERMISSION_DENIED
+                      - INVALID_TOKEN_CONTEXT
           examples:
-            FORBIDDEN:
-              description: Not authorized to perform the requested operation
+            GENERIC_403_PERMISSION_DENIED:
+              description: Permission denied. OAuth2 token access does not have the required scope or when the user fails operational security
               value:
                 status: 403
-                code: FORBIDDEN
-                message: Not authorized to perform the requested operation
+                code: PERMISSION_DENIED
+                message: Client does not have sufficient permissions to perform this action.
+            GENERIC_403_INVALID_TOKEN_CONTEXT:
+              description: Reflect some inconsistency between information in some field of the API and the related OAuth2 Token
+              value:
+                status: 403
+                code: INVALID_TOKEN_CONTEXT
+                message: "{{field}} is not consistent with access token."
     Generic404:
-      description: Not Found
+      description: Not found
       headers:
         x-correlator:
           $ref: "#/components/headers/x-correlator"
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/ErrorInfo"
+            allOf:
+              - $ref: "#/components/schemas/ErrorInfo"
+              - type: object
+                properties:
+                  status:
+                    enum:
+                      - 404
+                  code:
+                    enum:
+                      - NOT_FOUND
+                      - IDENTIFIER_NOT_FOUND
           examples:
-            NOT_FOUND:
-              description: The requested resource was not found
+            GENERIC_404_NOT_FOUND:
+              description: Resource is not found
               value:
                 status: 404
                 code: NOT_FOUND
-                message: The requested resource was not found
+                message: The specified resource is not found.
+            GENERIC_404_IDENTIFIER_NOT_FOUND:
+              description: Some identifier cannot be matched to a device
+              value:
+                status: 404
+                code: IDENTIFIER_NOT_FOUND
+                message: Device identifier not found.
     Generic422:
-      description: Unprocessable Entity
+      description: Unprocessable Content
       headers:
         x-correlator:
           $ref: "#/components/headers/x-correlator"
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/ErrorInfo"
+            allOf:
+              - $ref: "#/components/schemas/ErrorInfo"
+              - type: object
+                properties:
+                  status:
+                    enum:
+                      - 422
+                  code:
+                    enum:
+                      - SERVICE_NOT_APPLICABLE
+                      - MISSING_IDENTIFIER
+                      - UNSUPPORTED_IDENTIFIER
+                      - UNNECESSARY_IDENTIFIER
           examples:
-            MISSING_IDENTIFIER:
-              description: The subject could not be identified from the access token and the device object was not provided
+            GENERIC_422_SERVICE_NOT_APPLICABLE:
+              description: Service not applicable for the provided identifier
+              value:
+                status: 422
+                code: SERVICE_NOT_APPLICABLE
+                message: The service is not available for the provided identifier.
+            GENERIC_422_MISSING_IDENTIFIER:
+              description: An identifier is not included in the request and the device or phone number identification cannot be derived from the 3-legged access token
               value:
                 status: 422
                 code: MISSING_IDENTIFIER
-                message: The subject could not be identified
-            UNNECESSARY_IDENTIFIER:
-              description: The subject could be identified from the access token but the device object was also provided
+                message: The device cannot be identified.
+            GENERIC_422_UNSUPPORTED_IDENTIFIER:
+              description: None of the provided identifiers is supported by the implementation
+              value:
+                status: 422
+                code: UNSUPPORTED_IDENTIFIER
+                message: The identifier provided is not supported.
+            GENERIC_422_UNNECESSARY_IDENTIFIER:
+              description: An explicit identifier is provided when a device or phone number has already been identified from the access token
               value:
                 status: 422
                 code: UNNECESSARY_IDENTIFIER
-                message: Device object should not be provided when using a three-legged token
+                message: The device is already identified by the access token.
     Generic429:
       description: Too Many Requests
       headers:
@@ -430,14 +522,30 @@ components:
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/ErrorInfo"
+            allOf:
+              - $ref: "#/components/schemas/ErrorInfo"
+              - type: object
+                properties:
+                  status:
+                    enum:
+                      - 429
+                  code:
+                    enum:
+                      - QUOTA_EXCEEDED
+                      - TOO_MANY_REQUESTS
           examples:
-            TOO_MANY_REQUESTS:
-              description: Rate limit exceeded
+            GENERIC_429_QUOTA_EXCEEDED:
+              description: Request is rejected due to exceeding a business quota limit
+              value:
+                status: 429
+                code: QUOTA_EXCEEDED
+                message: Out of resource quota.
+            GENERIC_429_TOO_MANY_REQUESTS:
+              description: Access to the API has been temporarily blocked due to rate or spike arrest limits being reached
               value:
                 status: 429
                 code: TOO_MANY_REQUESTS
-                message: Rate limit exceeded
+                message: Rate limit reached.
     Generic500:
       description: Internal Server Error
       headers:
@@ -446,11 +554,20 @@ components:
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/ErrorInfo"
+            allOf:
+              - $ref: "#/components/schemas/ErrorInfo"
+              - type: object
+                properties:
+                  status:
+                    enum:
+                      - 500
+                  code:
+                    enum:
+                      - INTERNAL
           examples:
-            INTERNAL_SERVER_ERROR:
-              description: An unexpected error occurred
+            GENERIC_500_INTERNAL:
+              description: Problem in Server side. Regular Server Exception
               value:
                 status: 500
-                code: INTERNAL_SERVER_ERROR
-                message: An unexpected error occurred
+                code: INTERNAL
+                message: Unknown server error. Typically a server bug.
