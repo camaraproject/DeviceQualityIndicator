@@ -2,7 +2,7 @@ openapi: 3.0.3
 info:
   title: Media Rate API
   version: wip
-  x-camara-commonalities: 0.5
+  x-camara-commonalities: 0.6
   description: |
     This is a media rate service API that allows application developers to retrieve
     the maximum media bit rate supported for a given device.
