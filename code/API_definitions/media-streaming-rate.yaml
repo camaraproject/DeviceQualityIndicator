@@ -307,6 +307,8 @@ components:
       type: object
       description: The maximum downstream media streaming bit rate supported for the device.
       properties:
+        device:
+          $ref: "#/components/schemas/DeviceResponse"
         maxDownstreamMediaBitRateSupported:
           type: integer
           description: The maximum downstream bit rate supported for the device
